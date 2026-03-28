@@ -138,25 +138,26 @@ export default function ProblemsPage() {
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filters
         </div>
-        <div className="flex flex-wrap gap-2">
-          <div className="relative">
+        {/* Mobile: stacked full-width. sm+: inline flex-wrap with fixed widths */}
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+          <div className="relative w-full sm:w-52">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Search problems..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="pl-8 w-52 h-8 text-sm"
+              className="pl-8 w-full h-8 text-sm"
             />
           </div>
           <Select value={topicFilter} onValueChange={v => setTopicFilter(v ?? "all")}>
-            <SelectTrigger className="w-44 h-8 text-sm"><SelectValue placeholder="Topic" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-44 h-8 text-sm"><SelectValue placeholder="Topic" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Topics</SelectItem>
               {TOPICS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={difficultyFilter} onValueChange={v => setDifficultyFilter((v ?? "all") as Difficulty | "all")}>
-            <SelectTrigger className="w-36 h-8 text-sm"><SelectValue placeholder="Difficulty" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-36 h-8 text-sm"><SelectValue placeholder="Difficulty" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Difficulties</SelectItem>
               <SelectItem value="easy">Easy</SelectItem>
@@ -165,7 +166,7 @@ export default function ProblemsPage() {
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={v => setStatusFilter((v ?? "all") as Status | "all")}>
-            <SelectTrigger className="w-36 h-8 text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-36 h-8 text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="todo">To Do</SelectItem>
@@ -175,7 +176,7 @@ export default function ProblemsPage() {
             </SelectContent>
           </Select>
           <Select value={frequencyFilter} onValueChange={v => setFrequencyFilter(v ?? "all")}>
-            <SelectTrigger className="w-40 h-8 text-sm"><SelectValue placeholder="Frequency" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-40 h-8 text-sm"><SelectValue placeholder="Frequency" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Frequencies</SelectItem>
               <SelectItem value="Extremely High">Extremely High</SelectItem>
@@ -184,7 +185,7 @@ export default function ProblemsPage() {
             </SelectContent>
           </Select>
           {hasFilters && (
-            <Button variant="ghost" size="sm" className="h-8 text-sm text-muted-foreground" onClick={resetFilters}>
+            <Button variant="ghost" size="sm" className="h-8 text-sm text-muted-foreground w-full sm:w-auto" onClick={resetFilters}>
               Reset
             </Button>
           )}
@@ -218,56 +219,84 @@ export default function ProblemsPage() {
           return (
             <div
               key={problem.id}
-              className="group grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-3 items-center px-3 py-2.5 rounded-lg border border-transparent hover:border-border hover:bg-card transition-all"
+              className="group rounded-lg border border-transparent hover:border-border hover:bg-card transition-all"
               style={{ animationDelay: `${i * 0.01}s` }}
             >
-              {/* Name + external link */}
-              <div className="flex items-center gap-2 min-w-0">
-                <Link
-                  href={`/problems/${problem.id}`}
-                  className="font-medium text-sm truncate hover:text-primary transition-colors"
-                >
-                  {problem.name}
-                </Link>
-                <a
-                  href={problem.leetcodeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                >
-                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground hover:text-primary transition-colors" />
-                </a>
+              {/* ── Mobile card layout (< md) ──────────────────────────── */}
+              <div className="md:hidden px-3 py-3 space-y-2">
+                {/* Row 1: name + external link */}
+                <div className="flex items-center gap-2 min-w-0">
+                  <Link
+                    href={`/problems/${problem.id}`}
+                    className="font-medium text-sm truncate hover:text-primary transition-colors flex-1 min-w-0"
+                  >
+                    {problem.name}
+                  </Link>
+                  <a
+                    href={problem.leetcodeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-shrink-0"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground hover:text-primary transition-colors" />
+                  </a>
+                </div>
+                {/* Row 2: difficulty + status + topic pill */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={cn("inline-flex px-2 py-0.5 rounded-full text-xs font-medium border", DIFF_STYLES[problem.difficulty])}>
+                    {problem.difficulty}
+                  </span>
+                  <StatusBadge status={status} />
+                  <span className="text-xs text-muted-foreground">{problem.topic}</span>
+                </div>
+                {/* Row 3: quick status select */}
+                <Select value={status} onValueChange={v => v && handleStatusChange(problem.id, v as Status)}>
+                  <SelectTrigger className="h-7 w-full text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">To Do</SelectItem>
+                    <SelectItem value="inprogress">In Progress</SelectItem>
+                    <SelectItem value="solved">Solved</SelectItem>
+                    <SelectItem value="needs_review">Needs Review</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              {/* Difficulty */}
-              <span className={cn("inline-flex px-2 py-0.5 rounded-full text-xs font-medium border w-16 justify-center", DIFF_STYLES[problem.difficulty])}>
-                {problem.difficulty}
-              </span>
-
-              {/* Status */}
-              <div className="w-24">
-                <StatusBadge status={status} />
+              {/* ── Desktop table layout (md+) ─────────────────────────── */}
+              <div className="hidden md:grid md:grid-cols-[1fr_auto_auto_auto_auto_auto_auto] gap-3 items-center px-3 py-2.5">
+                {/* Name + external link */}
+                <div className="flex items-center gap-2 min-w-0">
+                  <Link
+                    href={`/problems/${problem.id}`}
+                    className="font-medium text-sm truncate hover:text-primary transition-colors"
+                  >
+                    {problem.name}
+                  </Link>
+                  <a
+                    href={problem.leetcodeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground hover:text-primary transition-colors" />
+                  </a>
+                </div>
+                <span className={cn("inline-flex px-2 py-0.5 rounded-full text-xs font-medium border w-16 justify-center", DIFF_STYLES[problem.difficulty])}>
+                  {problem.difficulty}
+                </span>
+                <div className="w-24"><StatusBadge status={status} /></div>
+                <Badge variant="secondary" className="text-xs w-32 justify-center truncate">{problem.topic}</Badge>
+                <span className="text-xs text-muted-foreground w-28 truncate">{problem.pattern}</span>
+                <span className={cn("text-xs w-24", FREQ_STYLES[problem.frequency])}>{problem.frequency}</span>
+                <Select value={status} onValueChange={v => v && handleStatusChange(problem.id, v as Status)}>
+                  <SelectTrigger className="h-7 w-32 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">To Do</SelectItem>
+                    <SelectItem value="inprogress">In Progress</SelectItem>
+                    <SelectItem value="solved">Solved</SelectItem>
+                    <SelectItem value="needs_review">Needs Review</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-
-              {/* Topic */}
-              <Badge variant="secondary" className="text-xs w-32 justify-center truncate">{problem.topic}</Badge>
-
-              {/* Pattern */}
-              <span className="text-xs text-muted-foreground w-28 truncate">{problem.pattern}</span>
-
-              {/* Frequency */}
-              <span className={cn("text-xs w-24", FREQ_STYLES[problem.frequency])}>{problem.frequency}</span>
-
-              {/* Quick status */}
-              <Select value={status} onValueChange={v => v && handleStatusChange(problem.id, v as Status)}>
-                <SelectTrigger className="h-7 w-32 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todo">To Do</SelectItem>
-                  <SelectItem value="inprogress">In Progress</SelectItem>
-                  <SelectItem value="solved">Solved</SelectItem>
-                  <SelectItem value="needs_review">Needs Review</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           );
         })}
