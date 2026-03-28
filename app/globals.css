@@ -193,6 +193,20 @@
   background-color: var(--emerald) !important;
 }
 
+/* Shiki code preview */
+.shiki-preview pre {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  min-height: 280px;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+}
+.shiki-preview code {
+  font-family: inherit;
+}
+
 /* Fade-in animation */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(8px); }

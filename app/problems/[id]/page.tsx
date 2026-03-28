@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CodeEditor } from "@/components/code-editor";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PROBLEMS } from "@/lib/problems";
@@ -250,19 +251,12 @@ export default function ProblemDetailPage() {
         </div>
 
         {/* Solution Code */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Solution Code</label>
-            <span className="text-xs text-muted-foreground font-mono">paste your solution</span>
-          </div>
-          <Textarea
-            value={entry.solutionCode}
-            onChange={e => update({ solutionCode: e.target.value })}
-            placeholder="// paste your solution here..."
-            className="font-mono text-sm resize-none bg-muted/30"
-            rows={12}
-          />
-        </div>
+        <CodeEditor
+          value={entry.solutionCode}
+          lang={entry.solutionLang ?? "python"}
+          onChange={solutionCode => update({ solutionCode })}
+          onLangChange={solutionLang => update({ solutionLang })}
+        />
       </div>
 
       {/* Footer */}

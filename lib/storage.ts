@@ -30,6 +30,7 @@ export function getDefaultEntry(id: string): ProblemEntry {
     userDifficultyRating: null,
     notes: "",
     solutionCode: "",
+    solutionLang: "python",
     timeTakenMinutes: null,
     dateSolved: null,
     attempts: 0,

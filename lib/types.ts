@@ -7,6 +7,7 @@ export interface ProblemEntry {
   userDifficultyRating: 1 | 2 | 3 | 4 | 5 | null;
   notes: string;
   solutionCode: string;
+  solutionLang: string;
   timeTakenMinutes: number | null;
   dateSolved: string | null;
   attempts: number;
