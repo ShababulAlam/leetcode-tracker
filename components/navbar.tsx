@@ -19,6 +19,7 @@ export function Navbar() {
   }, []);
 
   const links = [
+    { href: "/dashboard", label: "Dashboard" },
     { href: "/problems", label: "Problems" },
     { href: "/activity", label: "Activity" },
   ];
@@ -45,7 +46,7 @@ export function Navbar() {
               href={link.href}
               className={cn(
                 "nav-link px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
-                pathname === link.href
+                pathname === link.href || pathname.startsWith(link.href + "/")
                   ? "active text-foreground bg-accent"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}

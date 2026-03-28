@@ -1,227 +1,298 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Activity, Target, TrendingUp, Clock, AlertCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { StatusBadge } from "@/components/status-badge";
-import { getUserId } from "@/lib/user";
-import { getAllEntries } from "@/lib/storage";
-import { PROBLEMS } from "@/lib/problems";
-import { ProblemEntry } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import type { Metadata } from "next";
+import {
+  ArrowRight, BookOpen, Activity, Star, Code2, Flame,
+  CheckCircle2, BarChart3, Zap, Lock, RefreshCw,
+} from "lucide-react";
 
-// Vercel best practice: lazy state initializer to avoid redundant localStorage reads
-function loadEntries(): ProblemEntry[] {
-  return getAllEntries();
-}
+export const metadata: Metadata = {
+  title: "LCTracker — Personal LeetCode Progress Tracker",
+  description:
+    "Track your LeetCode journey across 63 curated problems. Log solutions, monitor streaks, visualize progress with a GitHub-style heatmap — all stored locally, no account needed.",
+  keywords: [
+    "LeetCode tracker", "coding interview prep", "algorithm practice",
+    "problem solving tracker", "LeetCode progress", "data structures",
+  ],
+  openGraph: {
+    title: "LCTracker — Personal LeetCode Progress Tracker",
+    description:
+      "Track your LeetCode journey across 63 curated problems. Log solutions, monitor streaks, visualize progress — no account needed.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LCTracker — Personal LeetCode Progress Tracker",
+    description:
+      "Track your LeetCode journey across 63 curated problems. Log solutions, monitor streaks, visualize progress — no account needed.",
+  },
+};
 
-const TOPICS = [...new Set(PROBLEMS.map(p => p.topic))];
+const FEATURES = [
+  {
+    icon: BookOpen,
+    title: "63 Curated Problems",
+    description:
+      "Hand-picked problems across 10 core topics — Arrays, Trees, Graphs, DP, and more. Every problem you need for top-tier interviews.",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+  },
+  {
+    icon: BarChart3,
+    title: "Progress Dashboard",
+    description:
+      "See your overall completion rate, progress by topic and difficulty, and recently updated problems — all at a glance.",
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+  },
+  {
+    icon: Code2,
+    title: "Solution Code Editor",
+    description:
+      "Paste your solution and preview it with Shiki syntax highlighting in 11 languages. Keep your approach notes alongside.",
+    color: "text-violet-500",
+    bg: "bg-violet-500/10",
+  },
+  {
+    icon: Flame,
+    title: "Streak & Heatmap",
+    description:
+      "GitHub-style activity heatmap and streak counter. Stay consistent and watch your solving habit grow day by day.",
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+  },
+  {
+    icon: Star,
+    title: "Personal Difficulty Rating",
+    description:
+      "Rate each problem by how hard you found it — not just LeetCode's label. Great for scheduling reviews.",
+    color: "text-rose-500",
+    bg: "bg-rose-500/10",
+  },
+  {
+    icon: Lock,
+    title: "100% Local, No Sign-up",
+    description:
+      "All data lives in your browser's localStorage. No account, no server, no tracking. Your progress stays private.",
+    color: "text-slate-400",
+    bg: "bg-slate-500/10",
+  },
+];
 
-export default function Dashboard() {
-  const [userId, setUserId] = useState("");
-  const [entries, setEntries] = useState<ProblemEntry[]>(loadEntries);
+const STEPS = [
+  {
+    number: "01",
+    title: "Pick a Problem",
+    description:
+      "Browse the curated list of 63 problems filtered by topic, difficulty, pattern, or frequency.",
+  },
+  {
+    number: "02",
+    title: "Track Your Attempt",
+    description:
+      "Log your status, time taken, attempts, date solved, difficulty rating, and paste your solution code.",
+  },
+  {
+    number: "03",
+    title: "Review & Improve",
+    description:
+      "Use the activity heatmap and topic breakdown to identify gaps and stay consistent with your practice.",
+  },
+];
 
-  useEffect(() => {
-    setUserId(getUserId());
-  }, []);
+const STATS = [
+  { value: "63", label: "Curated Problems" },
+  { value: "10", label: "Core Topics" },
+  { value: "11", label: "Languages Supported" },
+  { value: "0", label: "Sign-ups Required" },
+];
 
-  // Vercel best practice: derive state during render, not in effects
-  const entryMap = new Map(entries.map(e => [e.id, e]));
-  const solved = entries.filter(e => e.status === "solved").length;
-  const inProgress = entries.filter(e => e.status === "inprogress").length;
-  const needsReview = entries.filter(e => e.status === "needs_review").length;
-  const total = PROBLEMS.length;
-  const pct = total > 0 ? Math.round((solved / total) * 100) : 0;
+const TOPICS = [
+  "Arrays & Hashing", "Two Pointers", "Sliding Window",
+  "Binary Search", "Linked List", "Trees",
+  "Graphs", "Dynamic Programming", "Backtracking", "Heap / Priority Queue",
+];
 
-  const topicProgress = TOPICS.map(topic => {
-    const tp = PROBLEMS.filter(p => p.topic === topic);
-    const ts = tp.filter(p => entryMap.get(p.id)?.status === "solved").length;
-    return { topic, solved: ts, total: tp.length };
-  });
-
-  const difficultyProgress = (["easy", "medium", "hard"] as const).map(diff => {
-    const dp = PROBLEMS.filter(p => p.difficulty === diff);
-    const ds = dp.filter(p => entryMap.get(p.id)?.status === "solved").length;
-    return { diff, solved: ds, total: dp.length };
-  });
-
-  const recentlyUpdated = [...entries]
-    .sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated))
-    .slice(0, 5)
-    .flatMap(entry => {
-      const problem = PROBLEMS.find(p => p.id === entry.id);
-      return problem ? [{ entry, problem }] : [];
-    });
-
-  const statCards = [
-    {
-      label: "Total Problems",
-      value: total,
-      icon: BookOpen,
-      accent: "card-accent-slate",
-      valueClass: "text-foreground",
-    },
-    {
-      label: "Solved",
-      value: solved,
-      icon: Target,
-      accent: "card-accent-emerald",
-      valueClass: "text-emerald-600 dark:text-emerald-400",
-    },
-    {
-      label: "In Progress",
-      value: inProgress,
-      icon: TrendingUp,
-      accent: "card-accent-blue",
-      valueClass: "text-blue-600 dark:text-blue-400",
-    },
-    {
-      label: "Needs Review",
-      value: needsReview,
-      icon: AlertCircle,
-      accent: "card-accent-amber",
-      valueClass: "text-amber-600 dark:text-amber-400",
-    },
-  ];
-
+export default function LandingPage() {
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="fade-in">
-        <h1 className="text-3xl font-semibold tracking-tight">Welcome back</h1>
-        <p className="text-muted-foreground text-sm mt-1.5 flex items-center gap-1.5">
-          Session ID:
-          <code className="font-mono text-xs bg-muted border border-border px-1.5 py-0.5 rounded text-muted-foreground">
-            {userId || "loading..."}
-          </code>
+    <div className="relative">
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section className="relative py-20 md:py-32 text-center overflow-hidden">
+        {/* Dot-grid + radial fade overlay */}
+        <div className="dot-grid absolute inset-0 -z-10" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-background/60 to-background" />
+
+        {/* Badge */}
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary mb-6 fade-in">
+          <Zap className="h-3 w-3" />
+          Free &amp; Open Source · No account needed
+        </div>
+
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight fade-in fade-in-delay-1">
+          Master LeetCode.<br />
+          <span className="text-primary">Track Every Step.</span>
+        </h1>
+
+        <p className="mt-5 max-w-xl mx-auto text-base md:text-lg text-muted-foreground leading-relaxed fade-in fade-in-delay-2">
+          A focused tracker for your coding interview prep — 63 curated problems,
+          solution notes, a Shiki-powered code editor, streak tracking, and a
+          GitHub-style activity heatmap. All saved locally in your browser.
         </p>
-      </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 fade-in fade-in-delay-1">
-        {statCards.map(({ label, value, icon: Icon, accent, valueClass }) => (
-          <Card key={label} className={cn("overflow-hidden transition-shadow hover:shadow-md", accent)}>
-            <CardHeader className="pb-1 pt-4 px-4">
-              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5 uppercase tracking-wide">
-                <Icon className="h-3.5 w-3.5" />
-                {label}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-4">
-              <div className={cn("text-3xl font-bold", valueClass)}>{value}</div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3 fade-in fade-in-delay-3">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow hover:opacity-90 transition-opacity"
+          >
+            Go to Dashboard
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/problems"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold hover:bg-muted transition-colors"
+          >
+            <BookOpen className="h-4 w-4" />
+            Browse Problems
+          </Link>
+        </div>
+      </section>
 
-      {/* Overall Progress */}
-      <Card className="fade-in fade-in-delay-2">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Overall Progress</CardTitle>
-            <span className="text-2xl font-bold text-primary">{pct}%</span>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Progress value={pct} className="h-2.5 rounded-full" />
-          <p className="text-xs text-muted-foreground">{solved} of {total} problems solved</p>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 md:grid-cols-2 fade-in fade-in-delay-3">
-        {/* Progress by Topic */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">By Topic</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {topicProgress.map(({ topic, solved, total }) => (
-              <div key={topic} className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="font-medium">{topic}</span>
-                  <span className="text-muted-foreground tabular-nums">{solved}/{total}</span>
-                </div>
-                <Progress value={total > 0 ? (solved / total) * 100 : 0} className="h-1.5 rounded-full" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Progress by Difficulty */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">By Difficulty</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {difficultyProgress.map(({ diff, solved, total }) => {
-              const diffStyle = {
-                easy: "text-emerald-600 dark:text-emerald-400",
-                medium: "text-amber-600 dark:text-amber-400",
-                hard: "text-red-600 dark:text-red-400",
-              }[diff];
-              return (
-                <div key={diff} className="space-y-1.5">
-                  <div className="flex justify-between text-xs">
-                    <span className={cn("font-semibold capitalize", diffStyle)}>{diff}</span>
-                    <span className="text-muted-foreground tabular-nums">{solved}/{total}</span>
-                  </div>
-                  <Progress value={total > 0 ? (solved / total) * 100 : 0} className="h-2 rounded-full" />
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recently Updated */}
-      {recentlyUpdated.length > 0 && (
-        <Card className="fade-in fade-in-delay-4">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
-                Recently Updated
-              </CardTitle>
-              <Link href="/problems" className="text-xs text-primary hover:underline flex items-center gap-0.5">
-                View all <ArrowRight className="h-3 w-3" />
-              </Link>
+      {/* ── Stats strip ───────────────────────────────────────────────────── */}
+      <section className="border-y border-border/60 bg-card/50">
+        <div className="grid grid-cols-2 md:grid-cols-4">
+          {STATS.map(({ value, label }, i) => (
+            <div
+              key={label}
+              className={`flex flex-col items-center justify-center py-8 px-4 text-center
+                ${i < STATS.length - 1 ? "md:border-r border-border/60" : ""}
+                ${i === 1 ? "border-r border-border/60 md:border-r" : ""}
+              `}
+            >
+              <span className="text-3xl font-bold text-primary tabular-nums">{value}</span>
+              <span className="mt-1 text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</span>
             </div>
-          </CardHeader>
-          <CardContent className="divide-y divide-border">
-            {recentlyUpdated.map(({ entry, problem }) => (
-              <div key={entry.id} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
-                <Link
-                  href={`/problems/${entry.id}`}
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                >
-                  {problem.name}
-                </Link>
-                <StatusBadge status={entry.status} />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+          ))}
+        </div>
+      </section>
 
-      {/* Quick Links */}
-      <div className="flex gap-3 fade-in fade-in-delay-4">
-        <Link
-          href="/problems"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <BookOpen className="h-4 w-4" />
-          Browse Problems
-        </Link>
-        <Link
-          href="/activity"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
-        >
-          <Activity className="h-4 w-4" />
-          View Activity
-        </Link>
-      </div>
+      {/* ── Features grid ─────────────────────────────────────────────────── */}
+      <section className="py-20 md:py-28">
+        <div className="text-center mb-12">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Features</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+            Everything you need to stay focused
+          </h2>
+          <p className="mt-3 text-muted-foreground max-w-md mx-auto text-sm">
+            No bloat. Just the tools that actually help you practice better and remember more.
+          </p>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(({ icon: Icon, title, description, color, bg }) => (
+            <div
+              key={title}
+              className="group rounded-xl border border-border bg-card p-5 hover:border-primary/40 hover:shadow-md transition-all duration-200"
+            >
+              <div className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${bg} mb-4`}>
+                <Icon className={`h-5 w-5 ${color}`} />
+              </div>
+              <h3 className="font-semibold text-sm mb-1.5">{title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── How it works ──────────────────────────────────────────────────── */}
+      <section className="py-20 md:py-24 border-t border-border/60">
+        <div className="text-center mb-12">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">How it works</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Simple by design</h2>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-3">
+          {STEPS.map(({ number, title, description }) => (
+            <div key={number} className="relative flex flex-col items-start gap-3 pl-6 border-l-2 border-border">
+              <span className="text-4xl font-bold text-primary/20 tabular-nums leading-none">{number}</span>
+              <h3 className="font-semibold">{title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Topics covered ─────────────────────────────────────────────────── */}
+      <section className="py-16 border-t border-border/60">
+        <div className="text-center mb-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Coverage</p>
+          <h2 className="text-2xl font-bold tracking-tight">10 core interview topics</h2>
+          <p className="mt-2 text-sm text-muted-foreground">Covering the patterns that appear most often in FAANG-level interviews.</p>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2.5 max-w-2xl mx-auto">
+          {TOPICS.map(topic => (
+            <span
+              key={topic}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground hover:border-primary/40 hover:bg-primary/5 transition-colors"
+            >
+              <CheckCircle2 className="h-3 w-3 text-primary flex-shrink-0" />
+              {topic}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Coming soon ───────────────────────────────────────────────────── */}
+      <section className="py-16 border-t border-border/60">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-5">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+            <RefreshCw className="h-6 w-6 text-amber-500" />
+          </div>
+          <div className="flex-1">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-2.5 py-0.5 text-xs font-semibold text-amber-500 mb-2">
+              Coming Soon
+            </div>
+            <h3 className="font-semibold text-base">LeetCode Sync</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Connect your public LeetCode profile and automatically sync accepted submissions.
+              We&apos;ll match your solutions to the curated list and update your progress — no manual entry needed.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ───────────────────────────────────────────────────────────── */}
+      <section className="relative py-20 md:py-28 text-center overflow-hidden border-t border-border/60">
+        <div className="dot-grid absolute inset-0 -z-10 opacity-50" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-transparent via-background/80 to-background" />
+
+        <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
+          Ready to level up your interview prep?
+        </h2>
+        <p className="mt-4 text-muted-foreground text-sm max-w-sm mx-auto">
+          No sign-up. No subscription. Just open it and start tracking.
+        </p>
+
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md hover:opacity-90 transition-opacity"
+          >
+            Get Started — It&apos;s Free
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/activity"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-3 text-sm font-medium hover:bg-muted transition-colors"
+          >
+            <Activity className="h-4 w-4" />
+            View Activity
+          </Link>
+        </div>
+
+        <p className="mt-6 text-xs text-muted-foreground">
+          Built by <span className="font-medium text-foreground">Shababul Alam</span> · Open Source
+        </p>
+      </section>
     </div>
   );
 }

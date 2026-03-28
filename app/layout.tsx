@@ -17,8 +17,35 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LCTracker — LeetCode Progress",
-  description: "Personal LeetCode progress tracking",
+  title: {
+    default: "LCTracker — Personal LeetCode Progress Tracker",
+    template: "%s | LCTracker",
+  },
+  description:
+    "Track your LeetCode journey across 63 curated problems. Log solutions, monitor streaks, visualize progress with a GitHub-style heatmap — no account needed.",
+  keywords: [
+    "LeetCode tracker", "coding interview prep", "algorithm practice",
+    "data structures", "LeetCode progress", "FAANG interview",
+  ],
+  authors: [{ name: "Shababul Alam" }],
+  creator: "Shababul Alam",
+  openGraph: {
+    type: "website",
+    siteName: "LCTracker",
+    title: "LCTracker — Personal LeetCode Progress Tracker",
+    description:
+      "Track your LeetCode journey across 63 curated problems. No account needed.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LCTracker — Personal LeetCode Progress Tracker",
+    description:
+      "Track your LeetCode journey across 63 curated problems. No account needed.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
