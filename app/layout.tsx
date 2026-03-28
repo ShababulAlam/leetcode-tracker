@@ -16,7 +16,15 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+    : new URL("http://localhost:4001");
+
 export const metadata: Metadata = {
+  // metadataBase makes all relative OG/twitter image URLs absolute —
+  // required for social crawlers (LinkedIn, Twitter, Slack, etc.)
+  metadataBase: siteUrl,
   title: {
     default: "LCTracker — Personal LeetCode Progress Tracker",
     template: "%s | LCTracker",
@@ -35,12 +43,15 @@ export const metadata: Metadata = {
     title: "LCTracker — Personal LeetCode Progress Tracker",
     description:
       "Track your LeetCode journey across 63 curated problems. No account needed.",
+    // Next.js auto-discovers /opengraph-image.tsx; this makes the URL explicit & absolute
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "LCTracker" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "LCTracker — Personal LeetCode Progress Tracker",
     description:
       "Track your LeetCode journey across 63 curated problems. No account needed.",
+    images: ["/opengraph-image"],
   },
   robots: {
     index: true,

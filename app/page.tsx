@@ -18,12 +18,14 @@ export const metadata: Metadata = {
     description:
       "Track your LeetCode journey across 63 curated problems. Log solutions, monitor streaks, visualize progress — no account needed.",
     type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "LCTracker" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "LCTracker — Personal LeetCode Progress Tracker",
     description:
       "Track your LeetCode journey across 63 curated problems. Log solutions, monitor streaks, visualize progress — no account needed.",
+    images: ["/opengraph-image"],
   },
 };
 
