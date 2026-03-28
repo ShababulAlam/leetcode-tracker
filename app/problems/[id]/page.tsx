@@ -3,8 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ExternalLink, Star, Check, ChevronLeft } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { ExternalLink, Star, Check, ChevronLeft, CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +30,7 @@ export default function ProblemDetailPage() {
 
   const [entry, setEntry] = useState<ProblemEntry | null>(null);
   const [saved, setSaved] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
   // Vercel best practice: use ref for transient timer to avoid re-renders
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -178,21 +179,24 @@ export default function ProblemDetailPage() {
             <label className="text-sm font-medium">Date Solved</label>
             <Popover>
               <PopoverTrigger
-                disabled={entry.status !== "solved"}
                 className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "w-full justify-start text-left font-normal",
-                  !entry.dateSolved && "text-muted-foreground"
+                  "inline-flex w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  entry.dateSolved ? "text-foreground" : "text-muted-foreground"
                 )}
               >
-                {entry.dateSolved ? format(new Date(entry.dateSolved), "PPP") : "Pick a date"}
+                <CalendarIcon className="h-4 w-4 opacity-50 flex-shrink-0" />
+                <span className="flex-1 text-left">
+                  {entry.dateSolved ? format(new Date(entry.dateSolved), "PPP") : "Pick a date"}
+                </span>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" side="bottom" align="start">
                 <Calendar
                   mode="single"
                   selected={entry.dateSolved ? new Date(entry.dateSolved) : undefined}
-                  onSelect={date => update({ dateSolved: date ? date.toISOString().split("T")[0] : null })}
-                  autoFocus
+                  onSelect={date => update({
+                    dateSolved: date ? date.toISOString().split("T")[0] : null,
+                    ...(date ? { status: "solved" } : {}),
+                  })}
                 />
               </PopoverContent>
             </Popover>
@@ -202,23 +206,33 @@ export default function ProblemDetailPage() {
         {/* Difficulty Rating */}
         <div className="space-y-1.5">
           <label className="text-sm font-medium">Your Difficulty Rating</label>
-          <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5].map(star => (
-              <button
-                key={star}
-                onClick={() => update({ userDifficultyRating: entry.userDifficultyRating === star ? null : star as 1|2|3|4|5 })}
-                className={cn(
-                  "transition-all hover:scale-110",
-                  star <= (entry.userDifficultyRating ?? 0)
-                    ? "text-amber-400"
-                    : "text-border hover:text-amber-300"
-                )}
-              >
-                <Star className="h-6 w-6 fill-current" />
-              </button>
-            ))}
-            {entry.userDifficultyRating && (
-              <span className="text-xs text-muted-foreground self-center ml-1">{entry.userDifficultyRating}/5</span>
+          <div
+            className="flex gap-1"
+            onMouseLeave={() => setHoverRating(0)}
+          >
+            {[1, 2, 3, 4, 5].map(star => {
+              const filled = star <= (hoverRating || entry.userDifficultyRating || 0);
+              return (
+                <button
+                  key={star}
+                  type="button"
+                  onMouseEnter={() => setHoverRating(star)}
+                  onClick={() => update({
+                    userDifficultyRating: entry.userDifficultyRating === star ? null : star as 1|2|3|4|5
+                  })}
+                  className={cn(
+                    "transition-all duration-100 hover:scale-110 focus:outline-none",
+                    filled ? "text-amber-400" : "text-border"
+                  )}
+                >
+                  <Star className="h-6 w-6 fill-current" />
+                </button>
+              );
+            })}
+            {(hoverRating > 0 || entry.userDifficultyRating) && (
+              <span className="text-xs text-muted-foreground self-center ml-2">
+                {hoverRating || entry.userDifficultyRating}/5
+              </span>
             )}
           </div>
         </div>

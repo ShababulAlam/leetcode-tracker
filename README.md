@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LCTracker
+
+A personal LeetCode progress tracking app built with Next.js. Track your problem-solving journey across 63 curated problems, log solutions, notes, and visualize your activity over time.
+
+## Features
+
+- **Problem Tracker** — Browse and filter 63 curated LeetCode problems by topic, difficulty, pattern, and status
+- **Detailed Tracking** — Per-problem tracking: status, attempts, time taken, date solved, personal difficulty rating, notes, and solution code
+- **Activity Heatmap** — GitHub-style contribution heatmap showing daily solving activity
+- **Streak Tracking** — Current and longest streak stats
+- **Dark/Light Mode** — Theme toggle with system preference detection
+- **LeetCode Sync** *(Coming Soon)* — Sync your accepted submissions directly from LeetCode
+
+## Tech Stack
+
+- [Next.js 15](https://nextjs.org/) (App Router, Turbopack)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS v4](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/) (base-ui flavor)
+- [date-fns](https://date-fns.org/)
+- [Lucide Icons](https://lucide.dev/)
+- `localStorage` — all data persisted locally, no backend required
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) 18+
+- [pnpm](https://pnpm.io/)
+
+### Install & Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Install dependencies
+pnpm install
+
+# Start dev server on port 4001
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:4001](http://localhost:4001) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm build
+pnpm start
+```
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+leetcode-tracker/
+├── app/
+│   ├── page.tsx              # Dashboard / home
+│   ├── problems/
+│   │   ├── page.tsx          # Problem list with filters
+│   │   └── [id]/page.tsx     # Problem detail & tracking form
+│   └── activity/page.tsx     # Activity heatmap & streaks
+├── components/
+│   ├── navbar.tsx            # Top navigation bar
+│   ├── status-badge.tsx      # Status pill badge
+│   └── sync-dialog.tsx       # LeetCode sync dialog (coming soon)
+├── lib/
+│   ├── problems.ts           # 63 curated problem definitions
+│   ├── storage.ts            # localStorage read/write helpers
+│   ├── sync.ts               # LeetCode sync logic (alfa-leetcode-api)
+│   ├── types.ts              # Shared TypeScript types
+│   └── user.ts               # Anonymous user ID generation
+└── public/
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Data Storage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All data is stored in `localStorage` under these keys:
 
-## Deploy on Vercel
+| Key | Contents |
+|-----|----------|
+| `lct_problems` | Map of problem entries (status, notes, solution code, etc.) |
+| `lct_activity` | Array of daily activity counts for the heatmap |
+| `lct_sync_meta` | LeetCode sync metadata (username, last sync time) |
+| `lct_user_id` | Anonymous local user identifier |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+No account or login required. All data stays on your device.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## LeetCode Sync (Coming Soon)
+
+The sync feature will use the public [alfa-leetcode-api](https://github.com/alfaarghya/alfa-leetcode-api) to fetch your accepted submissions by LeetCode username (no API key required — profile must be public). It will:
+
+- Match accepted submissions against the 63 tracked problems
+- Mark matched problems as **Solved** with the earliest accepted submission date
+- Merge LeetCode submission calendar into the activity heatmap
+- Show a preview diff before applying any changes
+
+## Author
+
+**Shababul Alam**
+
+## License
+
+MIT

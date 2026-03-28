@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Moon, Sun, Code2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Moon, Sun, Code2, RefreshCw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getUserId } from "@/lib/user";
 import { useEffect, useState } from "react";
@@ -27,6 +26,7 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
       <div className="container mx-auto flex h-14 items-center px-4 max-w-6xl">
+
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 mr-8 group">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground transition-transform group-hover:scale-105">
@@ -56,28 +56,54 @@ export function Navbar() {
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-md"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
-            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
+        <TooltipProvider>
+          <div className="flex items-center gap-2">
 
-          <TooltipProvider>
+            {/* LeetCode Sync — Coming Soon */}
             <Tooltip>
-              <TooltipTrigger className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 border border-primary/20 text-xs font-mono text-primary cursor-default font-medium transition-colors hover:bg-primary/20">
+              <TooltipTrigger
+                className="relative inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/40 cursor-not-allowed"
+                disabled
+              >
+                <RefreshCw className="h-4 w-4" />
+                {/* Coming soon dot */}
+                <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs flex items-center gap-1.5">
+                <span className="text-amber-400 font-semibold">Coming Soon</span>
+                — LeetCode Sync
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Theme toggle */}
+            <Tooltip>
+              <TooltipTrigger
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              >
+                <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Toggle theme
+              </TooltipContent>
+            </Tooltip>
+
+            {/* User avatar */}
+            <Tooltip>
+              <TooltipTrigger className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 border border-primary/20 text-xs font-mono text-primary cursor-default font-medium hover:bg-primary/20 transition-colors">
                 {userId.slice(0, 2).toUpperCase()}
               </TooltipTrigger>
               <TooltipContent side="bottom" className="font-mono text-xs">
                 {userId.slice(0, 8)}
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
-        </div>
+
+          </div>
+        </TooltipProvider>
       </div>
     </nav>
   );
